@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='windows-1252'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+    <Product
+        Id='*'
+        Name='UniFi Auto Adopt'
+        UpgradeCode='12345678-1234-1234-1234-123456789012'
+        Manufacturer='1 SYSTEMS'
+        Language='1033'
+        Codepage='1252'
+        Version='0.1.0'>
+
+        <Package
+            Id='*'
+            Keywords='Installer'
+            Description='Automatic UniFi Device Adoption Tool'
+            Manufacturer='1 SYSTEMS'
+            InstallerVersion='200'
+            Languages='1033'
+            Compressed='yes'
+            SummaryCodepage='1252' />
+
+        <Media Id='1' Cabinet='media1.cab' EmbedCab='yes' DiskPrompt='CD-ROM #1' />
+        <Property Id='DiskPrompt' Value='UniFi Auto Adopt Installation' />
+
+        <Directory Id='TARGETDIR' Name='SourceDir'>
+            <Directory Id='ProgramFilesFolder' Name='PFiles'>
+                <Directory Id='APPLICATIONROOTDIRECTORY' Name='UniFi Auto Adopt'>
+                    <Component Id='MainExecutable' Guid='23456789-2345-2345-2345-234567890123'>
+                        <File
+                            Id='UniFiAutoAdoptEXE'
+                            Name='auto-unifi-adopt-rust.exe'
+                            DiskId='1'
+                            Source='$(var.CargoTargetBinDir)\auto-unifi-adopt-rust.exe'
+                            KeyPath='yes' />
+                    </Component>
+                </Directory>
+            </Directory>
+
+            <Directory Id='ProgramMenuFolder'>
+                <Directory Id='ApplicationProgramsFolder' Name='UniFi Auto Adopt'>
+                    <Component Id='ApplicationShortcut' Guid='34567890-3456-3456-3456-345678901234'>
+                        <Shortcut
+                            Id='ApplicationStartMenuShortcut'
+                            Name='UniFi Auto Adopt'
+                            Description='Automatic UniFi Device Adoption Tool'
+                            Target='[APPLICATIONROOTDIRECTORY]auto-unifi-adopt-rust.exe'
+                            WorkingDirectory='APPLICATIONROOTDIRECTORY'
+                            Icon='ProductIcon' />
+                        <RemoveFolder Id='ApplicationProgramsFolder' On='uninstall' />
+                        <RegistryValue
+                            Root='HKCU'
+                            Key='Software\1SYSTEMS\UniFiAutoAdopt'
+                            Name='installed'
+                            Type='integer'
+                            Value='1'
+                            KeyPath='yes' />
+                    </Component>
+                </Directory>
+            </Directory>
+
+            <Directory Id='DesktopFolder' Name='Desktop'>
+                <Component Id='DesktopShortcut' Guid='45678901-4567-4567-4567-456789012345'>
+                    <Shortcut
+                        Id='ApplicationDesktopShortcut'
+                        Name='UniFi Auto Adopt'
+                        Description='Automatic UniFi Device Adoption Tool'
+                        Target='[APPLICATIONROOTDIRECTORY]auto-unifi-adopt-rust.exe'
+                        WorkingDirectory='APPLICATIONROOTDIRECTORY'
+                        Icon='ProductIcon' />
+                    <RegistryValue
+                        Root='HKCU'
+                        Key='Software\1SYSTEMS\UniFiAutoAdopt'
+                        Name='desktop_shortcut'
+                        Type='integer'
+                        Value='1'
+                        KeyPath='yes' />
+                </Component>
+            </Directory>
+        </Directory>
+
+        <Feature
+            Id='Complete'
+            Title='UniFi Auto Adopt'
+            Description='Complete installation'
+            Display='expand'
+            Level='1'
+            ConfigurableDirectory='APPLICATIONROOTDIRECTORY'>
+            <ComponentRef Id='MainExecutable' />
+            <ComponentRef Id='ApplicationShortcut' />
+            <ComponentRef Id='DesktopShortcut' />
+        </Feature>
+
+        <Icon Id='ProductIcon' SourceFile='app_icon.ico' />
+        <Property Id='ARPPRODUCTICON' Value='ProductIcon' />
+        <Property Id='ARPHELPLINK' Value='https://github.com/yourusername/auto-unifi-adopt-rust' />
+
+        <UI>
+            <UIRef Id='WixUI_InstallDir' />
+            <Publish Dialog='ExitDialog'
+                Control='Finish'
+                Event='DoAction'
+                Value='LaunchApplication'>WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
+        </UI>
+
+        <Property Id='WIXUI_INSTALLDIR' Value='APPLICATIONROOTDIRECTORY' />
+        <Property Id='WixShellExecTarget' Value='[#UniFiAutoAdoptEXE]' />
+        <CustomAction Id='LaunchApplication'
+            BinaryKey='WixCA'
+            DllEntry='WixShellExec'
+            Impersonate='yes' />
+    </Product>
+</Wix>
