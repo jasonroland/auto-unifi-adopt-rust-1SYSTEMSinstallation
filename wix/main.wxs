@@ -33,11 +33,6 @@
                             DiskId='1'
                             Source='$(var.CargoTargetBinDir)\auto-unifi-adopt-rust.exe'
                             KeyPath='yes' />
-                        <File
-                            Id='OuiDatabaseFile'
-                            Name='oui-database.txt'
-                            DiskId='1'
-                            Source='oui-database.txt' />
                     </Component>
                 </Directory>
             </Directory>
@@ -102,6 +97,10 @@
 
         <UI>
             <UIRef Id='WixUI_Minimal' />
+            <!-- Skip the license agreement page -->
+            <Publish Dialog='WelcomeDlg' Control='Next' Event='NewDialog' Value='InstallDirDlg' Order='2'>1</Publish>
+            <Publish Dialog='InstallDirDlg' Control='Back' Event='NewDialog' Value='WelcomeDlg' Order='2'>1</Publish>
+
             <Publish Dialog='ExitDialog'
                 Control='Finish'
                 Event='DoAction'

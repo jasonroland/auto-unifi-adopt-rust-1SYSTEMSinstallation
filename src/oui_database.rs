@@ -3,6 +3,9 @@ use std::sync::OnceLock;
 
 static OUI_MAP: OnceLock<HashMap<String, String>> = OnceLock::new();
 
+// Embed the OUI database file directly into the binary
+const OUI_DATABASE_EMBEDDED: &str = include_str!("../oui-database.txt");
+
 pub fn get_manufacturer(mac: &str) -> String {
     let oui_map = OUI_MAP.get_or_init(|| load_oui_database());
 
@@ -37,30 +40,28 @@ pub fn get_manufacturer(mac: &str) -> String {
 fn load_oui_database() -> HashMap<String, String> {
     let mut map = HashMap::new();
 
-    // Always load the fallback database first (embedded in binary)
-    // This ensures it works regardless of installation location
-    load_fallback_database(&mut map);
-
-    // Optional: Try to load additional entries from external file if present
-    // This allows users to add custom OUI entries without recompiling
-    if let Ok(contents) = std::fs::read_to_string("oui-database.txt") {
-        for line in contents.lines() {
-            // Look for lines with (base 16) or (hex) which contain the OUI and company name
-            if line.contains("(base 16)") || line.contains("(hex)") {
-                let parts: Vec<&str> = line.split_whitespace().collect();
-                if parts.len() >= 3 {
-                    let oui = parts[0].replace("-", "").to_uppercase();
-                    // Extract company name (everything after the OUI and type marker)
-                    let marker = if line.contains("(base 16)") { "(base 16)" } else { "(hex)" };
-                    if let Some(pos) = line.find(marker) {
-                        let company = line[pos + marker.len()..].trim().to_string();
-                        if !company.is_empty() {
-                            map.insert(oui, company);
-                        }
+    // Load the embedded OUI database (compiled into the binary)
+    for line in OUI_DATABASE_EMBEDDED.lines() {
+        // Look for lines with (base 16) or (hex) which contain the OUI and company name
+        if line.contains("(base 16)") || line.contains("(hex)") {
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            if parts.len() >= 3 {
+                let oui = parts[0].replace("-", "").to_uppercase();
+                // Extract company name (everything after the OUI and type marker)
+                let marker = if line.contains("(base 16)") { "(base 16)" } else { "(hex)" };
+                if let Some(pos) = line.find(marker) {
+                    let company = line[pos + marker.len()..].trim().to_string();
+                    if !company.is_empty() {
+                        map.insert(oui, company);
                     }
                 }
             }
         }
+    }
+
+    // Fallback: If embedded database failed to load for some reason, use hardcoded essentials
+    if map.is_empty() {
+        load_fallback_database(&mut map);
     }
 
     map
