@@ -37,7 +37,12 @@ pub fn get_manufacturer(mac: &str) -> String {
 fn load_oui_database() -> HashMap<String, String> {
     let mut map = HashMap::new();
 
-    // Try to load from the OUI database file
+    // Always load the fallback database first (embedded in binary)
+    // This ensures it works regardless of installation location
+    load_fallback_database(&mut map);
+
+    // Optional: Try to load additional entries from external file if present
+    // This allows users to add custom OUI entries without recompiling
     if let Ok(contents) = std::fs::read_to_string("oui-database.txt") {
         for line in contents.lines() {
             // Look for lines with (base 16) which contain the OUI and company name
@@ -57,16 +62,11 @@ fn load_oui_database() -> HashMap<String, String> {
         }
     }
 
-    // If we couldn't load the file or it's empty, fall back to a small hardcoded list
-    if map.is_empty() {
-        load_fallback_database(&mut map);
-    }
-
     map
 }
 
 fn load_fallback_database(map: &mut HashMap<String, String>) {
-    // Ubiquiti
+    // Ubiquiti (all known OUIs)
     map.insert("002722".to_string(), "Ubiquiti Networks".to_string());
     map.insert("FCECDA".to_string(), "Ubiquiti Inc".to_string());
     map.insert("B4FBE4".to_string(), "Ubiquiti Inc".to_string());
@@ -81,20 +81,42 @@ fn load_fallback_database(map: &mut HashMap<String, String>) {
     map.insert("687251".to_string(), "Ubiquiti Networks".to_string());
     map.insert("24A43C".to_string(), "Ubiquiti Networks".to_string());
     map.insert("E063DA".to_string(), "Ubiquiti Inc".to_string());
+    map.insert("78453C".to_string(), "Ubiquiti Inc".to_string());
+    map.insert("788A20".to_string(), "Ubiquiti Inc".to_string());
+    map.insert("D0217C".to_string(), "Ubiquiti Inc".to_string());
+    map.insert("A42BB0".to_string(), "Ubiquiti Inc".to_string());
 
-    // Other common manufacturers
+    // Common network equipment manufacturers
     map.insert("001B44".to_string(), "D-Link".to_string());
     map.insert("001EC2".to_string(), "D-Link".to_string());
     map.insert("002191".to_string(), "D-Link".to_string());
     map.insert("000C42".to_string(), "Linksys".to_string());
     map.insert("001310".to_string(), "Linksys".to_string());
     map.insert("0015E9".to_string(), "Linksys".to_string());
+    map.insert("00145E".to_string(), "TP-Link".to_string());
+    map.insert("0C80DA".to_string(), "TP-Link".to_string());
+    map.insert("A07A0C".to_string(), "TP-Link".to_string());
+    map.insert("002686".to_string(), "Cisco".to_string());
+    map.insert("000D3A".to_string(), "Cisco".to_string());
+    map.insert("001644".to_string(), "Cisco Linksys".to_string());
+    map.insert("00055D".to_string(), "NetGear".to_string());
+    map.insert("001B2F".to_string(), "NetGear".to_string());
+    map.insert("0009B7".to_string(), "NetGear".to_string());
+
+    // Virtualization
     map.insert("005056".to_string(), "VMware".to_string());
     map.insert("000C29".to_string(), "VMware".to_string());
     map.insert("080027".to_string(), "Oracle VirtualBox".to_string());
     map.insert("00155D".to_string(), "Microsoft Hyper-V".to_string());
+
+    // Common devices
     map.insert("001CB3".to_string(), "Apple".to_string());
     map.insert("00236C".to_string(), "Apple".to_string());
+    map.insert("3C0754".to_string(), "Apple".to_string());
     map.insert("B827EB".to_string(), "Raspberry Pi Foundation".to_string());
     map.insert("DCA632".to_string(), "Raspberry Pi Foundation".to_string());
+    map.insert("E45F01".to_string(), "Raspberry Pi Trading".to_string());
+    map.insert("001EC0".to_string(), "Intel Corporate".to_string());
+    map.insert("00215C".to_string(), "Intel Corporate".to_string());
+    map.insert("0026C7".to_string(), "Intel Corporate".to_string());
 }

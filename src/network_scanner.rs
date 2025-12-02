@@ -62,6 +62,10 @@ async fn check_device(ip: String) -> Option<Device> {
     // Device is alive, check if it has SSH
     let has_ssh = check_ssh(&ip).await;
 
+    // On Windows, give a tiny delay for ARP cache to populate after ping
+    #[cfg(target_os = "windows")]
+    tokio::time::sleep(Duration::from_millis(50)).await;
+
     // Try to get MAC address via ARP or use placeholder
     let mac = get_mac_address(&ip).await.unwrap_or_else(|| String::from("Unknown"));
     let company = crate::oui_database::get_manufacturer(&mac);
@@ -93,11 +97,18 @@ async fn ping_device(ip: &str) -> bool {
     #[cfg(target_os = "windows")]
     let args = vec!["-n", "1", "-w", "1000", ip];
 
-    match tokio::process::Command::new(ping_cmd)
-        .args(&args)
-        .output()
-        .await
+    let mut cmd = tokio::process::Command::new(ping_cmd);
+    cmd.args(&args);
+
+    // Hide console window on Windows
+    #[cfg(target_os = "windows")]
     {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+
+    match cmd.output().await {
         Ok(output) => output.status.success(),
         Err(_) => false,
     }
@@ -165,19 +176,35 @@ async fn get_mac_address(ip: &str) -> Option<String> {
 
     #[cfg(target_os = "windows")]
     {
-        if let Ok(output) = tokio::process::Command::new("arp")
-            .arg("-a")
-            .arg(ip)
-            .output()
-            .await
-        {
+        // Try with full ARP table first (more reliable on Windows)
+        let mut cmd = tokio::process::Command::new("arp");
+        cmd.arg("-a");
+
+        // Hide console window on Windows
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+
+        if let Ok(output) = cmd.output().await {
             let stdout = String::from_utf8_lossy(&output.stdout);
+            // Windows ARP output format:
+            // Internet Address      Physical Address      Type
+            // 192.168.1.1           aa-bb-cc-dd-ee-ff     dynamic
             for line in stdout.lines() {
+                // Look for line containing our IP
                 if line.contains(ip) {
                     let parts: Vec<&str> = line.split_whitespace().collect();
+                    // parts[0] = IP, parts[1] = MAC, parts[2] = type
                     if parts.len() >= 2 {
-                        let mac = parts[1].replace("-", ":");
-                        return Some(mac.to_uppercase());
+                        let mac_str = parts[1];
+                        // Check if it's a valid MAC (not "incomplete" or other status)
+                        if mac_str.contains('-') || mac_str.contains(':') {
+                            let mac = mac_str.replace("-", ":");
+                            // Filter out incomplete or invalid MACs
+                            if mac.len() >= 17 {  // AA:BB:CC:DD:EE:FF is 17 chars
+                                return Some(mac.to_uppercase());
+                            }
+                        }
                     }
                 }
             }
