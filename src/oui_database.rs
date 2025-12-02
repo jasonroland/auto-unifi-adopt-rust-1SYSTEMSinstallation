@@ -45,14 +45,15 @@ fn load_oui_database() -> HashMap<String, String> {
     // This allows users to add custom OUI entries without recompiling
     if let Ok(contents) = std::fs::read_to_string("oui-database.txt") {
         for line in contents.lines() {
-            // Look for lines with (base 16) which contain the OUI and company name
-            if line.contains("(base 16)") {
+            // Look for lines with (base 16) or (hex) which contain the OUI and company name
+            if line.contains("(base 16)") || line.contains("(hex)") {
                 let parts: Vec<&str> = line.split_whitespace().collect();
-                if parts.len() >= 4 {
+                if parts.len() >= 3 {
                     let oui = parts[0].replace("-", "").to_uppercase();
-                    // Extract company name (everything after the OUI and "(base 16)")
-                    if let Some(pos) = line.find("(base 16)") {
-                        let company = line[pos + 9..].trim().to_string();
+                    // Extract company name (everything after the OUI and type marker)
+                    let marker = if line.contains("(base 16)") { "(base 16)" } else { "(hex)" };
+                    if let Some(pos) = line.find(marker) {
+                        let company = line[pos + marker.len()..].trim().to_string();
                         if !company.is_empty() {
                             map.insert(oui, company);
                         }
