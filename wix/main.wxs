@@ -17,15 +17,16 @@
             InstallerVersion='200'
             Languages='1033'
             Compressed='yes'
-            SummaryCodepage='1252' />
+            SummaryCodepage='1252'
+            Platform='x64' />
 
         <Media Id='1' Cabinet='media1.cab' EmbedCab='yes' DiskPrompt='CD-ROM #1' />
         <Property Id='DiskPrompt' Value='UniFi Auto Adopt Installation' />
 
         <Directory Id='TARGETDIR' Name='SourceDir'>
-            <Directory Id='ProgramFilesFolder' Name='PFiles'>
+            <Directory Id='ProgramFiles64Folder' Name='PFiles'>
                 <Directory Id='APPLICATIONROOTDIRECTORY' Name='UniFi Auto Adopt'>
-                    <Component Id='MainExecutable' Guid='23456789-2345-2345-2345-234567890123'>
+                    <Component Id='MainExecutable' Guid='23456789-2345-2345-2345-234567890123' Win64='yes'>
                         <File
                             Id='UniFiAutoAdoptEXE'
                             Name='auto-unifi-adopt-rust.exe'
@@ -38,7 +39,7 @@
 
             <Directory Id='ProgramMenuFolder'>
                 <Directory Id='ApplicationProgramsFolder' Name='UniFi Auto Adopt'>
-                    <Component Id='ApplicationShortcut' Guid='34567890-3456-3456-3456-345678901234'>
+                    <Component Id='ApplicationShortcut' Guid='34567890-3456-3456-3456-345678901234' Win64='yes'>
                         <Shortcut
                             Id='ApplicationStartMenuShortcut'
                             Name='UniFi Auto Adopt'
@@ -59,7 +60,7 @@
             </Directory>
 
             <Directory Id='DesktopFolder' Name='Desktop'>
-                <Component Id='DesktopShortcut' Guid='45678901-4567-4567-4567-456789012345'>
+                <Component Id='DesktopShortcut' Guid='45678901-4567-4567-4567-456789012345' Win64='yes'>
                     <Shortcut
                         Id='ApplicationDesktopShortcut'
                         Name='UniFi Auto Adopt'
