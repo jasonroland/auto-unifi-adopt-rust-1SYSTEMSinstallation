@@ -103,8 +103,8 @@ async fn ping_device(ip: &str) -> bool {
     // Hide console window on Windows
     #[cfg(target_os = "windows")]
     {
-        use std::os::windows::process::CommandExt;
         const CREATE_NO_WINDOW: u32 = 0x08000000;
+        use std::os::windows::process::CommandExt;
         cmd.creation_flags(CREATE_NO_WINDOW);
     }
 
@@ -181,8 +181,8 @@ async fn get_mac_address(ip: &str) -> Option<String> {
         cmd.arg("-a");
 
         // Hide console window on Windows
-        use std::os::windows::process::CommandExt;
         const CREATE_NO_WINDOW: u32 = 0x08000000;
+        use std::os::windows::process::CommandExt;
         cmd.creation_flags(CREATE_NO_WINDOW);
 
         if let Ok(output) = cmd.output().await {
