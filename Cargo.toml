@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Your Name <your.email@example.com>"]
 description = "Automatic UniFi Device Adoption Tool"
-license = "MIT"
+license = "GNU General Public License v3.0"
 
 [dependencies]
 iced = { version = "0.12", features = ["tokio"] }
