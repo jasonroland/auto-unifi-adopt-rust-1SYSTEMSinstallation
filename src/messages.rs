@@ -1,0 +1,37 @@
+use crate::models::SettingsTab;
+use iced::widget::text_editor;
+
+#[derive(Debug, Clone)]
+pub enum Message {
+    IpAddressChanged(String),
+    AdoptClicked,
+    AdoptAgainClicked,
+    SettingsClicked,
+    CloseSettings,
+    SaveSettings,
+    TabSelected(SettingsTab),
+    ControllerUrlChanged(String),
+    UsernameChanged(String),
+    PasswordChanged(String),
+    AltUsernameChanged(String),
+    AltPasswordChanged(String),
+    AdoptionComplete(Result<String, String>),
+    LogUpdate(String),
+    LogEditorAction(text_editor::Action),
+    ScanClicked,
+    CloseScan,
+    ManualEntryClicked,
+    CloseManualEntry,
+    IpRangeStartChanged(String),
+    IpRangeEndChanged(String),
+    ScanDevices,
+    ScanComplete(Result<Vec<crate::models::Device>, String>),
+    DeviceToggled(usize, bool),
+    DeviceRowClicked(usize),
+    DeviceStatusIconClicked(usize),
+    AdoptSelectedDefault,
+    AdoptSelectedAlt,
+    DeviceAdoptionComplete(usize, Result<String, String>),
+    DeviceLogUpdate(usize, String),
+    ClosePopup,
+}
