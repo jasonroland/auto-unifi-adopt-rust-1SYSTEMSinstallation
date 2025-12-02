@@ -1,0 +1,10 @@
+[package]
+name = "auto-unifi-adopt-rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+iced = { version = "0.12", features = ["tokio"] }
+tokio = { version = "1", features = ["full"] }
+ssh2 = "0.9"
+get_if_addrs = "0.5"

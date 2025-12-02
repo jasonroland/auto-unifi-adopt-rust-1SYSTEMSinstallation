@@ -1,0 +1,4 @@
+/target
+config.txt
+Cargo.lock
+.DS_Store
